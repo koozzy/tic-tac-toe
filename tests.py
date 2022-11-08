@@ -66,6 +66,7 @@ class TestLogic(unittest.TestCase):
 
         row_2 = 0
         col_2 = 0
+
         self.assertEqual(logic.input_move(board, row_1, col_1), True)
         self.assertEqual(logic.input_move(board, row_2, col_2), False)
 
@@ -85,7 +86,6 @@ class TestLogic(unittest.TestCase):
         self.assertEqual(logic.is_tie(board_2), False)
 
 
-    # TODO: Test all functions from logic.py!
 
 
 if __name__ == '__main__':
