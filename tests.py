@@ -24,9 +24,9 @@ class TestLogic(unittest.TestCase):
         ]
         self.assertEqual(logic.print_board(board), 'X')
     
-    def input_move(board, player, row, col)
-    
-    def is_valid_input(board, row, col)
+    def input_move(board, player, row, col)：
+
+    def is_valid_input(board, row, col)：
 
     def is_tie(self):
         board = [
