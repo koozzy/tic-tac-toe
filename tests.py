@@ -41,9 +41,34 @@ class TestLogic(unittest.TestCase):
         'None X None' 
         'None O X')
     
-    #def input_move(board, player, row, col)：
+    def input_move(self):
+        board = [
+            ['X', None, 'O'],
+            ['X', None, None],
+            [None, 'O', 'X'],
+        ]
+        player = 'O'
+        row = 0
+        col = 1
+        self.assertEqual(logic.input_move(board, player, row, col),
+        'X O O'
+        'X None None' 
+        'None O X')
 
-    #def is_valid_input(board, row, col)：
+    def is_valid_input(self):
+        board = [
+            ['X', None, 'O'],
+            ['X', None, None],
+            [None, 'O', 'X'],
+        ]
+        row_1 = 0
+        col_1 = 1
+
+        row_2 = 0
+        col_2 = 0
+        self.assertEqual(logic.input_move(board, row_1, col_1), True)
+        self.assertEqual(logic.input_move(board, row_2, col_2), False)
+
 
     def is_tie(self):
         board_1 = [
