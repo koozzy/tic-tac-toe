@@ -22,7 +22,7 @@ class TestLogic(unittest.TestCase):
         ]
         self.assertEqual(logic.get_winner(board_1), 'X')
         self.assertEqual(logic.get_winner(board_2), 'O')
-        self.assertEqual(logic.get_winner(board_3), None)
+        self.assertEqual(logic.get_winner(board_3), 'None')
 
     def other_player(self):
         player_1 = 'X'
