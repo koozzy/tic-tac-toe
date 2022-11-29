@@ -3,6 +3,8 @@
 # For core game logic, see logic.py.
 
 from logic import empty_square_move
+import csv
+import random
 
 class Board:
     def __init__(self):
@@ -46,23 +48,31 @@ class Board:
         for j in range(col_len):
             checker_set = set()
             for i in range(row_len):
-                checker_set = checker_set.add(self._rows[i][j])
+                checker_set.add(self._rows[i][j])
             if "O" not in checker_set or "X" not in checker_set:
                 return False
 
-        checker_set = set(self._rows[0][0], self._rows[1][1], self._rows[2][2])
+        checker_set = set([self._rows[0][0], self._rows[1][1], self._rows[2][2]])
         if "O" not in checker_set or "X" not in checker_set:
                 return False
 
-        checker_set = set(self._rows[0][2], self._rows[1][1], self._rows[2][0])        
+        checker_set = set([self._rows[0][2], self._rows[1][1], self._rows[2][0]])        
         if "O" not in checker_set or "X" not in checker_set:
                 return False
 
         return True  
 
 class Player:
-    def __init__(self, value):
+    def __init__(self, value, name):
         self.value = value
+        self.name = name
+        self.steps = 0
+    
+    def get_name(self):
+        return self.name
+
+    def get_steps(self):
+        return self.steps
         
     def get_move(self):
         pass
@@ -70,9 +80,16 @@ class Player:
     def get_value(self):
         return self.value
     
+    def add_step(self):
+        self.steps = self.steps + 1
+
+    def __str__(self):
+        return f"Name: {self.name}, Value: {self.value}"
+
+    
 class Human(Player):
-    def __init__(self, value):
-        super().__init__(value)
+    def __init__(self, value, name):
+        super().__init__(value, name)
     
     def get_move(self, board):
         row = int(input("Please enter row num: "))
@@ -83,15 +100,29 @@ class Human(Player):
         return (row, col)
 
 class Bot(Player):
-    def __init__(self, value):
-        super().__init__(value)
+    def __init__(self, value, name):
+        super().__init__(value, name)
         
     def get_move(self, board):
         return empty_square_move(board)
 
+class StupidBot(Player):
+    def __init__(self, value, name):
+        super().__init__(value, name)
+        
+    def get_move(self, board):
+        for row in range(3):
+            for col in range(3):
+                if board.get(row,col) is None:
+                    return (row, col)
+        return (None, None)
+
 class Game:
     def __init__(self, board):
         self.board = board
+
+    def clear_board(self):
+        self.board = Board()
         
     def setup_player(self):
         player_number = int(input("how many human players? 1 or 2: "))
@@ -102,6 +133,17 @@ class Game:
             self.player2 = Bot(second_player)
         else:
             self.player2 = Human(second_player)
+    
+    def setup_two_bots(self):
+        first_player = random.choice([1,2]) # 1 means Bot, 2 means StupidBot
+        if first_player == 1:
+            self.player1 = Bot("X", "1")
+            self.player2 = StupidBot("O", "2")
+        else:
+            self.player1 = StupidBot("X", "2")
+            self.player2 = Bot("O", "1")
+        print(f"first player is {self.player1}")
+        print(f"second player is {self.player2}")
     
     def find_winner(self):
         board = self.board
@@ -122,12 +164,15 @@ class Game:
         return None
     
     def run_game(self):
-        self.setup_player()
+        # self.setup_player()
+        self.clear_board()
+        self.setup_two_bots()
         winner = None
         while winner is None:
             (row, col) = self.player1.get_move(self.board)
             self.board.set(row, col, self.player1.get_value())
-            print(self.board)
+            self.player1.add_step()
+            # print(self.board)
 
             winner = self.find_winner()
             if winner == "T":
@@ -139,7 +184,8 @@ class Game:
             
             (row, col) = self.player2.get_move(self.board)
             self.board.set(row, col, self.player2.get_value())
-            print(self.board)
+            self.player2.add_step()
+            # print(self.board)
             winner = self.find_winner()
             if winner == "T":
                 print("This is a tie")
@@ -147,7 +193,51 @@ class Game:
             elif winner is not None:
                 print(f"winner is {winner}!")
                 break
+        
+        if winner == self.player1.get_value():
+            return self.record_result(self.player1, self.player2)
+        elif winner == self.player2.get_value():
+            return self.record_result(self.player2, self.player1)
+        else:
+            return self.record_result()
+    
+    def record_result(self, winner=None, loser=None):
+        result = []
+        if winner and loser:
+            result = [
+                game_id,
+                winner.get_name(), 
+                loser.get_name(), 
+                "N/A", 
+                self.player1.get_name(), 
+                self.player1.get_steps() + self.player2.get_steps(),
+                winner.get_value(),
+                winner.get_steps()
+            ]
+        else:
+            result = [
+                game_id,
+                "N/A", 
+                "N/A", 
+                "YES", 
+                self.player1.get_name(), 
+                self.player1.get_steps() + self.player2.get_steps(),
+                "N/A",
+                "N/A",
+            ]
+        return result
+
 
 if __name__ == '__main__':
+    header = ['game_id', 'winner_bot', 'loser_bot', 'draws', 'sente_bot','total_steps','winner_character','winner_steps']
+    f = open(r'TicTacToe_data.csv', 'a', encoding='UTF8')
+    writer = csv.writer(f)
+    writer.writerow(header)
+
     my_game = Game(Board())
-    my_game.run_game()
+    for i in range(100):
+        game_id = i + 1
+        data = my_game.run_game()
+        writer.writerow(data)
+    
+    f.close()
